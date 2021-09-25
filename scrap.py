@@ -57,3 +57,9 @@ def download_vectors(vectors_url):
     submit.click()
 
     driver.quit()
+
+
+def download_pdf(pdf_url):
+    response = requests.get(pdf_url, allow_redirects=True)
+    filename = settings.COPERNICUS_COMPONENT_ID + '.pdf'
+    open(filename, 'wb').write(response.content)
