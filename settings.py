@@ -36,3 +36,7 @@ KEYVALUE_API_URL = config(
 KEYVALUE_API_SET_URL = urljoin(KEYVALUE_API_URL, 'UpdateValue/')
 KEYVALUE_API_GET_URL = urljoin(KEYVALUE_API_URL, 'GetValue/')
 KEYVALUE_API_NAMESPACE = config('KEYVALUE_API_NAMESPACE', default='copernicus')
+
+LOGFILE = config('LOGFILE', default=PROJECT_DIR / (PROJECT_DIR.name + '.log'))
+LOGFILE_SIZE = config('LOGFILE_SIZE', cast=float, default=1e6)
+LOGFILE_BACKUP_COUNT = config('LOGFILE_BACKUP_COUNT', cast=int, default=3)
