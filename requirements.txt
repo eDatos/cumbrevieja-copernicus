@@ -3,3 +3,4 @@ beautifulsoup4
 selenium
 prettyconf
 pypdf2
+logzero
