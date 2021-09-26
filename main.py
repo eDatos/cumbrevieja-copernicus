@@ -32,8 +32,8 @@ def notify(
 
     if links := scrap.get_links(target_monitoring_id, not target_monitoring_id):
         vectors_url, pdf_url = links
-        vectors_file = scrap.download_vectors(vectors_url)
-        pdf_file = scrap.download_pdf(pdf_url)
+        vectors_file = scrap.download_vectors(vectors_url, target_monitoring_id)
+        pdf_file = scrap.download_pdf(pdf_url, target_monitoring_id)
         map_timestamp = services.extract_map_timestamp(pdf_file)
         notification.notify(target_monitoring_id, map_timestamp, [vectors_file])
         if clean:

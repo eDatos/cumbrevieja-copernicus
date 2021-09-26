@@ -53,7 +53,7 @@ def get_links(target_monitoring_id: int, update_monitoring_id=True):
                             return vectors_url, pdf_url
 
 
-def download_vectors(vectors_url: str, output_filename: str = None):
+def download_vectors(vectors_url: str, target_monitoring_id: int):
     logger.debug('Initializing webdriver with Selenium...')
     options = Options()
     options.headless = True
@@ -79,19 +79,16 @@ def download_vectors(vectors_url: str, output_filename: str = None):
 
     driver.quit()
 
-    if output_filename is None:
-        output_filename = settings.COPERNICUS_COMPONENT_ID + '.zip'
-
+    output_filename = f'{settings.COPERNICUS_COMPONENT_ID}-M{target_monitoring_id}.zip'
     logger.info(f'Renaming downloaded vectors file to {output_filename} ...')
     output_file = settings.DOWNLOADS_DIR / output_filename
     return services.rename_newest_file(output_file)
 
 
-def download_pdf(pdf_url: str, output_filename: str = None):
+def download_pdf(pdf_url: str, target_monitoring_id: int):
     logger.info(f'Downloading {pdf_url} ...')
     response = requests.get(pdf_url, allow_redirects=True)
-    if output_filename is None:
-        output_filename = settings.COPERNICUS_COMPONENT_ID + '.pdf'
+    output_filename = f'{settings.COPERNICUS_COMPONENT_ID}-M{target_monitoring_id}.pdf'
     output_file = settings.DOWNLOADS_DIR / output_filename
     output_file.write_bytes(response.content)
     return output_file
