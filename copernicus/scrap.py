@@ -80,13 +80,13 @@ def download_vectors(vectors_url: str, output_filename: str = None):
     if output_filename is None:
         output_filename = settings.COPERNICUS_COMPONENT_ID + '.zip'
 
-    logger.info('Renaming downloaded vectors file to {output_filename} ...')
+    logger.info(f'Renaming downloaded vectors file to {output_filename} ...')
     output_file = settings.DOWNLOADS_DIR / output_filename
     return services.rename_newest_file(output_file)
 
 
 def download_pdf(pdf_url: str, output_filename: str = None):
-    logger.info('Downloading {pdf_url} ...')
+    logger.info(f'Downloading {pdf_url} ...')
     response = requests.get(pdf_url, allow_redirects=True)
     if output_filename is None:
         output_filename = settings.COPERNICUS_COMPONENT_ID + '.pdf'
