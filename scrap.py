@@ -71,4 +71,4 @@ def download_pdf(pdf_url: str, output_filename: str = None):
         output_filename = settings.COPERNICUS_COMPONENT_ID + '.pdf'
     output_file = settings.DOWNLOADS_DIR / output_filename
     output_file.write_bytes(response.content)
-    return output_filename
+    return output_file
