@@ -1,6 +1,10 @@
+from pathlib import Path
 from urllib.parse import urljoin
 
 from prettyconf import config
+
+PROJECT_DIR = Path(__file__).resolve().parent
+
 
 COPERNICUS_BASE_URL = config(
     'COPERNICUS_BASE_URL',
@@ -12,3 +16,4 @@ TARGET_MONITORING_ID = config('TARGET_MONITORING_ID')
 TARGET_MONITORING_DISPLAY = f'Monitoring {TARGET_MONITORING_ID}'
 TARGET_MAP_ID = config('TARGET_MAP_ID', cast=int)
 TARGET_MAP_DISPLAY = f'RTP Map #{TARGET_MAP_ID:02d}'
+DOWNLOADS_DIR = PROJECT_DIR / config('DOWNLOADS_DIR', default='downloads')

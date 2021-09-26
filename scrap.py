@@ -1,4 +1,3 @@
-import os
 from urllib.parse import urljoin
 
 import requests
@@ -9,6 +8,7 @@ from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
+import services
 import settings
 
 
@@ -36,12 +36,12 @@ def get_links():
                         return vectors_url, pdf_url
 
 
-def download_vectors(vectors_url):
+def download_vectors(vectors_url: str, output_filename: str = None):
     options = Options()
     options.headless = True
     profile = webdriver.FirefoxProfile()
     profile.set_preference('browser.download.folderList', 2)
-    profile.set_preference('browser.download.dir', os.getcwd())
+    profile.set_preference('browser.download.dir', str(settings.DOWNLOADS_DIR))
     profile.set_preference('browser.helperApps.neverAsk.saveToDisk', 'application/zip')
     driver = webdriver.Firefox(options=options, firefox_profile=profile)
 
@@ -58,8 +58,17 @@ def download_vectors(vectors_url):
 
     driver.quit()
 
+    if output_filename is None:
+        output_filename = settings.COPERNICUS_COMPONENT_ID + '.zip'
 
-def download_pdf(pdf_url):
+    output_file = settings.DOWNLOADS_DIR / output_filename
+    return services.rename_newest_file(output_file)
+
+
+def download_pdf(pdf_url: str, output_filename: str = None):
     response = requests.get(pdf_url, allow_redirects=True)
-    filename = settings.COPERNICUS_COMPONENT_ID + '.pdf'
-    open(filename, 'wb').write(response.content)
+    if output_filename is None:
+        output_filename = settings.COPERNICUS_COMPONENT_ID + '.pdf'
+    output_file = settings.DOWNLOADS_DIR / output_filename
+    output_file.write_bytes(response.content)
+    return output_filename
