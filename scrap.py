@@ -10,9 +10,13 @@ from selenium.webdriver.support.ui import WebDriverWait
 
 import services
 import settings
+import storage
 
 
-def get_links():
+def get_links(target_monitoring_id: int):
+    target_monitoring_display = settings.TARGET_MONITORING_DISPLAY.format(
+        target_monitoring_id=target_monitoring_id
+    )
     response = requests.get(settings.COPERNICUS_COMPONENT_URL)
     soup = BeautifulSoup(response.text, features='html.parser')
     for row in soup.find_all(class_='views-row'):
@@ -21,7 +25,7 @@ def get_links():
             if a := vfield.span.a:
                 title = a.text
                 if (
-                    settings.TARGET_MONITORING_DISPLAY in title
+                    target_monitoring_display in title
                     and settings.TARGET_MAP_DISPLAY in title
                 ):
                     if settings.TARGET_STATUS in row.text.upper():
@@ -34,6 +38,9 @@ def get_links():
                         if a := pdf.div.a:
                             pdf_url = urljoin(settings.COPERNICUS_BASE_URL, a['href'])
                         if vectors_url is not None and pdf_url is not None:
+                            storage.set_value(
+                                settings.TARGET_MONITORING_ID_KEY, target_monitoring_id + 1
+                            )
                             return vectors_url, pdf_url
 
 
