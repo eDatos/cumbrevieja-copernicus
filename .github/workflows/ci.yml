@@ -1,0 +1,29 @@
+name: CI
+on:
+  schedule:
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
+jobs:
+  copernicus-scraping:
+    name: Scrap copernicus.eu looking for La Palma Volcano data
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+      - uses: BSFishy/pip-action@v1
+        with:
+          requirements: requirements.txt
+      - run: python main.py
+        env:
+          COPERNICUS_COMPONENT_ID: ${{ secrets.COPERNICUS_COMPONENT_ID }}
+          TARGET_MAP_ID: ${{ secrets.TARGET_MAP_ID }}
+          NOTIFICATION_FROM_ADDR: ${{ secrets.NOTIFICATION_FROM_ADDR }}
+          NOTIFICATION_TO_ADDRS: ${{ secrets.NOTIFICATION_TO_ADDRS }}
+          SMTP_SERVER: ${{ secrets.SMTP_SERVER }}
+          SMTP_PORT: ${{ secrets.SMTP_PORT }}
+          SMTP_USERNAME: ${{ secrets.SMTP_USERNAME }}
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+          KEYVALUE_API_TOKEN: ${{ secrets.KEYVALUE_API_TOKEN }}
