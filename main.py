@@ -29,6 +29,7 @@ def notify(
         map_timestamp = services.extract_map_timestamp(pdf_file)
         notification.notify(target_monitoring_id, map_timestamp, [vectors_file])
         if clean:
+            logger.debug('Cleaning downloads directory...')
             shutil.rmtree(settings.DOWNLOADS_DIR)
     else:
         logger.warning(
