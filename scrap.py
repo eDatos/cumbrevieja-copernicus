@@ -20,20 +20,21 @@ def get_links():
             vectors_url, pdf_url = None, None
             if a := vfield.span.a:
                 title = a.text
-                if all(
-                    [
-                        settings.TARGET_MONITORING_DISPLAY in title,
-                        settings.TARGET_MAP_DISPLAY in title,
-                    ]
+                if (
+                    settings.TARGET_MONITORING_DISPLAY in title
+                    and settings.TARGET_MAP_DISPLAY in title
                 ):
-                    vectors = row.find(class_='views-field-field-component-file-vectors')
-                    if a := vectors.div.a:
-                        vectors_url = urljoin(settings.COPERNICUS_BASE_URL, a['href'])
-                    pdf = row.find(class_='views-field-field-component-file-200dpi-pdf')
-                    if a := pdf.div.a:
-                        pdf_url = urljoin(settings.COPERNICUS_BASE_URL, a['href'])
-                    if vectors_url is not None and pdf_url is not None:
-                        return vectors_url, pdf_url
+                    if settings.TARGET_STATUS in row.text.upper():
+                        vectors = row.find(
+                            class_='views-field-field-component-file-vectors'
+                        )
+                        if a := vectors.div.a:
+                            vectors_url = urljoin(settings.COPERNICUS_BASE_URL, a['href'])
+                        pdf = row.find(class_='views-field-field-component-file-200dpi-pdf')
+                        if a := pdf.div.a:
+                            pdf_url = urljoin(settings.COPERNICUS_BASE_URL, a['href'])
+                        if vectors_url is not None and pdf_url is not None:
+                            return vectors_url, pdf_url
 
 
 def download_vectors(vectors_url: str, output_filename: str = None):
