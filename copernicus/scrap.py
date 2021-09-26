@@ -1,6 +1,7 @@
 from urllib.parse import urljoin
 
 import requests
+import settings
 from bs4 import BeautifulSoup
 from logzero import logger
 from selenium import webdriver
@@ -9,9 +10,7 @@ from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
-import services
-import settings
-import storage
+from copernicus import services, storage
 
 
 def get_links(target_monitoring_id: int):

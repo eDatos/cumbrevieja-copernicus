@@ -1,11 +1,7 @@
 import shutil
 
-import notification
-import scrap
-import services
 import settings
-import storage
-import utils
+from copernicus import notification, scrap, services, storage, utils
 
 logger = utils.init_logger()
 
