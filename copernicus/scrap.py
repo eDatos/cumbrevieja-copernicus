@@ -13,7 +13,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from copernicus import services, storage
 
 
-def get_links(target_monitoring_id: int):
+def get_links(target_monitoring_id: int, update_monitoring_id=True):
     target_monitoring_display = settings.TARGET_MONITORING_DISPLAY.format(
         target_monitoring_id=target_monitoring_id
     )
@@ -44,10 +44,12 @@ def get_links(target_monitoring_id: int):
                             pdf_url = urljoin(settings.COPERNICUS_BASE_URL, a['href'])
                             logger.debug(f'PDF url: {pdf_url}')
                         if vectors_url is not None and pdf_url is not None:
-                            logger.info('Updating key-value online storage...')
-                            storage.set_value(
-                                settings.TARGET_MONITORING_ID_KEY, target_monitoring_id + 1
-                            )
+                            if update_monitoring_id:
+                                logger.info('Updating key-value online storage...')
+                                storage.set_value(
+                                    settings.TARGET_MONITORING_ID_KEY,
+                                    target_monitoring_id + 1,
+                                )
                             return vectors_url, pdf_url
 
 

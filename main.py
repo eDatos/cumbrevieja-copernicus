@@ -12,17 +12,25 @@ logger = utils.init_logger()
 
 @app.command()
 def notify(
+    target_monitoring_id: int = typer.Option(
+        0,
+        '--monitoring-id',
+        '-m',
+        help='Target monitoring id. If 0, a key-value online storage is used instead!',
+    ),
     verbose: bool = typer.Option(False, '--verbose', '-vv', show_default=False),
     clean: bool = typer.Option(False, '--clean', '-x', show_default=False),
 ):
     logger.setLevel(logzero.DEBUG if verbose else logzero.INFO)
 
-    target_monitoring_id = storage.get_value(
-        settings.TARGET_MONITORING_ID_KEY, default=1, cast=int
-    )
+    if not target_monitoring_id:
+        logger.debug('Getting target monitoring id from key-value online storage...')
+        target_monitoring_id = storage.get_value(
+            settings.TARGET_MONITORING_ID_KEY, default=1, cast=int
+        )
     logger.info(f'Trying to retrieve Monitoring {target_monitoring_id}...')
 
-    if links := scrap.get_links(int(target_monitoring_id)):
+    if links := scrap.get_links(target_monitoring_id, not target_monitoring_id):
         vectors_url, pdf_url = links
         vectors_file = scrap.download_vectors(vectors_url)
         pdf_file = scrap.download_pdf(pdf_url)
