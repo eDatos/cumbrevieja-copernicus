@@ -1,3 +1,4 @@
+import os
 from urllib.parse import urljoin
 
 import requests
@@ -61,7 +62,9 @@ def download_vectors(vectors_url: str, target_monitoring_id: int):
     profile.set_preference('browser.download.folderList', 2)
     profile.set_preference('browser.download.dir', str(settings.DOWNLOADS_DIR))
     profile.set_preference('browser.helperApps.neverAsk.saveToDisk', 'application/zip')
-    driver = webdriver.Firefox(options=options, firefox_profile=profile)
+    driver = webdriver.Firefox(
+        options=options, firefox_profile=profile, service_log_path=os.devnull
+    )
 
     logger.info(f'Loading {vectors_url} ...')
     driver.get(vectors_url)
