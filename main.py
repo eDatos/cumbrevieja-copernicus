@@ -18,9 +18,19 @@ def run(
         '-m',
         help='Target monitoring id. If 0, a key-value online storage is used instead!',
     ),
-    verbose: bool = typer.Option(False, '--verbose', '-vv', show_default=False),
-    clean: bool = typer.Option(False, '--clean', '-x', show_default=False),
-    notify: bool = typer.Option(False, '--notify', '-n', show_default=False),
+    verbose: bool = typer.Option(
+        False, '--verbose', '-vv', show_default=False, help='Loglevel increased to debug'
+    ),
+    clean: bool = typer.Option(
+        False,
+        '--clean',
+        '-x',
+        show_default=False,
+        help='Remove download folder after execution',
+    ),
+    notify: bool = typer.Option(
+        False, '--notify', '-n', show_default=False, help='Notify vectors package via email'
+    ),
 ):
     logger.setLevel(logzero.DEBUG if verbose else logzero.INFO)
 
