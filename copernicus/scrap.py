@@ -58,17 +58,21 @@ def get_links(target_monitoring_id: int, update_monitoring_id=True):
                         return vectors_url, pdf_url
 
 
-def download_vectors(vectors_url: str, target_monitoring_id: int):
-    logger.debug('Initializing webdriver with Selenium...')
+def init_webdriver():
     options = Options()
     options.headless = True
     profile = webdriver.FirefoxProfile()
     profile.set_preference('browser.download.folderList', 2)
     profile.set_preference('browser.download.dir', str(settings.DOWNLOADS_DIR))
     profile.set_preference('browser.helperApps.neverAsk.saveToDisk', 'application/zip')
-    driver = webdriver.Firefox(
+    return webdriver.Firefox(
         options=options, firefox_profile=profile, service_log_path=os.devnull
     )
+
+
+def download_vectors(vectors_url: str, target_monitoring_id: int):
+    logger.debug('Initializing webdriver with Selenium...')
+    driver = init_webdriver()
 
     logger.info(f'Loading {vectors_url} ...')
     driver.get(vectors_url)
