@@ -22,7 +22,7 @@ def notify(monitoring_id: int, map_timestamp: str, vectors_file: Path):
     buf = []
     buf.append(map_timestamp or 'La marca temporal no está disponible en la web')
     if vectors_file is None:
-        buf.append('El fichero de vectores no está disponible en la web')
+        buf.append('El paquete de vectores no está disponible en la web')
     content = '<br>'.join(buf)
     msg.attach(MIMEText(content, 'html'))
 
