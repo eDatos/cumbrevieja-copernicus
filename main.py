@@ -11,7 +11,7 @@ logger = utils.init_logger()
 
 
 @app.command()
-def notify(
+def run(
     target_monitoring_id: int = typer.Option(
         0,
         '--monitoring-id',
@@ -20,6 +20,7 @@ def notify(
     ),
     verbose: bool = typer.Option(False, '--verbose', '-vv', show_default=False),
     clean: bool = typer.Option(False, '--clean', '-x', show_default=False),
+    notify: bool = typer.Option(False, '--notify', '-n', show_default=False),
 ):
     logger.setLevel(logzero.DEBUG if verbose else logzero.INFO)
 
@@ -41,7 +42,8 @@ def notify(
             map_timestamp = services.extract_map_timestamp(pdf_file)
         else:
             map_timestamp = None
-        notification.notify(target_monitoring_id, map_timestamp, vectors_file)
+        if notify:
+            notification.notify(target_monitoring_id, map_timestamp, vectors_file)
         if clean:
             logger.debug('Cleaning downloads directory...')
             shutil.rmtree(settings.DOWNLOADS_DIR)
