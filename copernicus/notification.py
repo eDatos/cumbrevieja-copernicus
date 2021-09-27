@@ -5,12 +5,11 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from pathlib import Path
 
+import settings
 from logzero import logger
 
-import settings
 
-
-def notify(monitoring_id: int, map_timestamp: str, attachments: list[Path]):
+def notify(monitoring_id: int, map_timestamp: str, vectors_file: Path):
     logger.info('Initializing notification handler...')
     send_from = settings.NOTIFICATION_FROM_ADDR
     send_to = settings.NOTIFICATION_TO_ADDRS
@@ -20,15 +19,19 @@ def notify(monitoring_id: int, map_timestamp: str, attachments: list[Path]):
     msg['To'] = ','.join(send_to)
     msg['Subject'] = f'Actualización Copernicus - Cumbre Vieja [Monitoring {monitoring_id}]'
 
-    content = map_timestamp
+    buf = []
+    buf.append(map_timestamp or 'La marca temporal no está disponible en la web')
+    if vectors_file is None:
+        buf.append('El fichero de vectores no está disponible en la web')
+    content = '<br>'.join(buf)
     msg.attach(MIMEText(content, 'html'))
 
     logger.debug('Adding attachments...')
-    for attachment in attachments:
+    if vectors_file is not None:
         part = MIMEBase('application', 'octet-stream')
-        part.set_payload(attachment.read_bytes())
+        part.set_payload(vectors_file.read_bytes())
         encoders.encode_base64(part)
-        part.add_header('Content-Disposition', f'attachment; filename={attachment.name}')
+        part.add_header('Content-Disposition', f'attachment; filename={vectors_file.name}')
         msg.attach(part)
 
     logger.info('Sending message with attached files...')

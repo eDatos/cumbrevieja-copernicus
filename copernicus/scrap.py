@@ -4,6 +4,7 @@ from urllib.parse import urljoin
 import requests
 import settings
 from bs4 import BeautifulSoup
+from bs4.element import PageElement
 from logzero import logger
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -12,6 +13,18 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
 from copernicus import services, storage
+
+
+def extract_artifact_url(artifact_id: str, row: PageElement):
+    try:
+        artifact = row.find(class_=f'views-field-field-component-file-{artifact_id}')
+        artifact_url = urljoin(settings.COPERNICUS_BASE_URL, artifact.div.a['href'])
+    except AttributeError:
+        logger.error(f'{artifact_id} link is not present')
+        artifact_url = None
+    else:
+        logger.debug(f'{artifact_id} url: {artifact_url}')
+    return artifact_url
 
 
 def get_links(target_monitoring_id: int, update_monitoring_id=True):
@@ -24,7 +37,6 @@ def get_links(target_monitoring_id: int, update_monitoring_id=True):
     soup = BeautifulSoup(response.text, features='html.parser')
     for row in soup.find_all(class_='views-row'):
         for vfield in row.find_all(class_='views-field views-field-title'):
-            vectors_url, pdf_url = None, None
             if a := vfield.span.a:
                 title = a.text
                 if (
@@ -33,25 +45,17 @@ def get_links(target_monitoring_id: int, update_monitoring_id=True):
                 ):
                     logger.debug(f'Matched view {title}')
                     if settings.TARGET_STATUS in row.text.upper():
+                        # Target monitoring id found and quality level achievied
                         logger.debug(f'{settings.TARGET_STATUS} found!')
-                        vectors = row.find(
-                            class_='views-field-field-component-file-vectors'
-                        )
-                        if a := vectors.div.a:
-                            vectors_url = urljoin(settings.COPERNICUS_BASE_URL, a['href'])
-                            logger.debug(f'Vectors url: {vectors_url}')
-                        pdf = row.find(class_='views-field-field-component-file-200dpi-pdf')
-                        if a := pdf.div.a:
-                            pdf_url = urljoin(settings.COPERNICUS_BASE_URL, a['href'])
-                            logger.debug(f'PDF url: {pdf_url}')
-                        if vectors_url is not None and pdf_url is not None:
-                            if update_monitoring_id:
-                                logger.info('Updating key-value online storage...')
-                                storage.set_value(
-                                    settings.TARGET_MONITORING_ID_KEY,
-                                    target_monitoring_id + 1,
-                                )
-                            return vectors_url, pdf_url
+                        if update_monitoring_id:
+                            logger.info('Updating key-value online storage...')
+                            storage.set_value(
+                                settings.TARGET_MONITORING_ID_KEY,
+                                target_monitoring_id + 1,
+                            )
+                        vectors_url = extract_artifact_url('vectors', row)
+                        pdf_url = extract_artifact_url('200dpi-pdf', row)
+                        return vectors_url, pdf_url
 
 
 def download_vectors(vectors_url: str, target_monitoring_id: int):
@@ -93,5 +97,6 @@ def download_pdf(pdf_url: str, target_monitoring_id: int):
     response = requests.get(pdf_url, allow_redirects=True)
     output_filename = f'{settings.COPERNICUS_COMPONENT_ID}-M{target_monitoring_id}.pdf'
     output_file = settings.DOWNLOADS_DIR / output_filename
+    output_file.parent.mkdir(parents=True, exist_ok=True)
     output_file.write_bytes(response.content)
     return output_file
