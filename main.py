@@ -31,7 +31,7 @@ def run(
         )
     logger.info(f'Trying to retrieve Monitoring {target_monitoring_id}...')
 
-    if links := scrap.get_links(target_monitoring_id, update_monitoring_id):
+    if links := scrap.get_links(target_monitoring_id):
         vectors_url, pdf_url = links
         if vectors_url:
             vectors_file = scrap.download_vectors(vectors_url, target_monitoring_id)
