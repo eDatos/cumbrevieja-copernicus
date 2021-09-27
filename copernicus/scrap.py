@@ -12,7 +12,7 @@ from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
-from copernicus import services, storage
+from copernicus import services
 
 
 def extract_artifact_url(artifact_id: str, row: PageElement):
@@ -27,7 +27,7 @@ def extract_artifact_url(artifact_id: str, row: PageElement):
     return artifact_url
 
 
-def get_links(target_monitoring_id: int, update_monitoring_id=True):
+def get_links(target_monitoring_id: int):
     target_monitoring_display = settings.TARGET_MONITORING_DISPLAY.format(
         target_monitoring_id=target_monitoring_id
     )
@@ -47,12 +47,6 @@ def get_links(target_monitoring_id: int, update_monitoring_id=True):
                     if settings.TARGET_STATUS in row.text.upper():
                         # Target monitoring id found and quality level achievied
                         logger.debug(f'{settings.TARGET_STATUS} found!')
-                        if update_monitoring_id:
-                            logger.info('Updating key-value online storage...')
-                            storage.set_value(
-                                settings.TARGET_MONITORING_ID_KEY,
-                                target_monitoring_id + 1,
-                            )
                         vectors_url = extract_artifact_url('vectors', row)
                         pdf_url = extract_artifact_url('200dpi-pdf', row)
                         return vectors_url, pdf_url

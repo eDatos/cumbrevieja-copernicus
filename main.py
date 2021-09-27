@@ -47,6 +47,12 @@ def run(
         if clean:
             logger.debug('Cleaning downloads directory...')
             shutil.rmtree(settings.DOWNLOADS_DIR)
+        if update_monitoring_id:
+            logger.info('Updating key-value online storage...')
+            storage.set_value(
+                settings.TARGET_MONITORING_ID_KEY,
+                target_monitoring_id + 1,
+            )
     else:
         logger.warning(
             f'Monitoring {target_monitoring_id} is not yet available '
