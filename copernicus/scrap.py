@@ -37,7 +37,7 @@ def get_products() -> list[PageElement]:
     for row in soup.find_all(class_='views-row'):
         if settings.TARGET_MAP_DISPLAY in row.text:
             title = row.find(class_='views-field-title').span.a.text
-            if s := re.search(rf'{settings.TARGET_MONITORING_ID_DISPLAY} *(\d)+', title):
+            if s := re.search(rf'{settings.TARGET_MONITORING_ID_DISPLAY} *(\d+)', title):
                 monitoring_id = int(s.groups()[0])
                 yield row, monitoring_id
 
