@@ -1,4 +1,6 @@
+import json
 import shutil
+from operator import itemgetter
 
 import logzero
 import typer
@@ -12,12 +14,6 @@ logger = utils.init_logger()
 
 @app.command()
 def run(
-    target_monitoring_id: int = typer.Option(
-        0,
-        '--monitoring-id',
-        '-m',
-        help='Target monitoring id. If 0, a key-value online storage is used instead!',
-    ),
     verbose: bool = typer.Option(
         False, '--verbose', '-vv', show_default=False, help='Loglevel increased to debug'
     ),
@@ -34,40 +30,46 @@ def run(
 ):
     logger.setLevel(logzero.DEBUG if verbose else logzero.INFO)
 
-    if update_monitoring_id := not target_monitoring_id:
-        logger.debug('Getting target monitoring id from key-value online storage...')
-        target_monitoring_id = storage.get_value(
-            settings.TARGET_MONITORING_ID_KEY, default=1, cast=int
-        )
-    logger.info(f'Trying to retrieve Monitoring {target_monitoring_id}...')
+    checked_monitoring_ids = storage.get_value(
+        settings.CHECKED_MONITORING_IDS_KEY, default=[], cast=json.loads
+    )
+    logger.debug(f'Checked monitoring ids: {checked_monitoring_ids}')
 
-    if links := scrap.get_links(target_monitoring_id):
-        vectors_url, pdf_url = links
-        if vectors_url:
-            vectors_file = scrap.download_vectors(vectors_url, target_monitoring_id)
+    for product, monitoring_id in sorted(scrap.get_products(), key=itemgetter(1)):
+        logger.info(f'Processing Monitoring {monitoring_id}...')
+        if settings.TARGET_STATUS in product.text:
+            if monitoring_id not in checked_monitoring_ids:
+                vectors_url, pdf_url = scrap.get_links(product)
+                if vectors_url:
+                    vectors_file = scrap.download_vectors(vectors_url, monitoring_id)
+                else:
+                    vectors_file = None
+                if pdf_url:
+                    pdf_file = scrap.download_pdf(pdf_url, monitoring_id)
+                    map_timestamp = services.extract_map_timestamp(pdf_file)
+                else:
+                    map_timestamp = None
+                if notify:
+                    notification.notify(monitoring_id, map_timestamp, vectors_file)
+
+                logger.debug(f'Adding #{monitoring_id} to checked monitoring ids...')
+                checked_monitoring_ids.append(monitoring_id)
+            else:
+                logger.warning(
+                    f'Monitoring {monitoring_id} is already checked. Discarding...'
+                )
         else:
-            vectors_file = None
-        if pdf_url:
-            pdf_file = scrap.download_pdf(pdf_url, target_monitoring_id)
-            map_timestamp = services.extract_map_timestamp(pdf_file)
-        else:
-            map_timestamp = None
-        if notify:
-            notification.notify(target_monitoring_id, map_timestamp, vectors_file)
-        if clean:
-            logger.debug('Cleaning downloads directory...')
-            shutil.rmtree(settings.DOWNLOADS_DIR)
-        if update_monitoring_id:
-            logger.info('Updating key-value online storage...')
-            storage.set_value(
-                settings.TARGET_MONITORING_ID_KEY,
-                target_monitoring_id + 1,
+            logger.warning(
+                f'Monitoring {monitoring_id} has not target status. Discarding...'
             )
-    else:
-        logger.warning(
-            f'Monitoring {target_monitoring_id} is not yet available '
-            'or in a desired quality level'
-        )
+
+    if clean:
+        logger.debug('Cleaning downloads directory...')
+        shutil.rmtree(settings.DOWNLOADS_DIR, ignore_errors=True)
+
+    storage.set_value(
+        settings.CHECKED_MONITORING_IDS_KEY, json.dumps(checked_monitoring_ids)
+    )
 
 
 if __name__ == "__main__":

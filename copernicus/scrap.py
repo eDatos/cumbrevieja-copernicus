@@ -1,4 +1,5 @@
 import os
+import re
 from urllib.parse import urljoin
 
 import requests
@@ -15,7 +16,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from copernicus import services
 
 
-def extract_artifact_url(artifact_id: str, row: PageElement):
+def _extract_artifact_url(artifact_id: str, row: PageElement):
     try:
         artifact = row.find(class_=f'views-field-field-component-file-{artifact_id}')
         artifact_url = urljoin(settings.COPERNICUS_BASE_URL, artifact.div.a['href'])
@@ -27,29 +28,24 @@ def extract_artifact_url(artifact_id: str, row: PageElement):
     return artifact_url
 
 
-def get_links(target_monitoring_id: int):
-    target_monitoring_display = settings.TARGET_MONITORING_DISPLAY.format(
-        target_monitoring_id=target_monitoring_id
-    )
-    logger.info(f'Scrapping {settings.COPERNICUS_COMPONENT_URL} ...')
+def get_products() -> list[PageElement]:
+    logger.info('Getting products with target map id...')
+    logger.debug(f'Scrapping {settings.COPERNICUS_COMPONENT_URL} ...')
     response = requests.get(settings.COPERNICUS_COMPONENT_URL)
     logger.debug('Parsing response with Beautiful Soup...')
     soup = BeautifulSoup(response.text, features='html.parser')
     for row in soup.find_all(class_='views-row'):
-        for vfield in row.find_all(class_='views-field views-field-title'):
-            if a := vfield.span.a:
-                title = a.text
-                if (
-                    target_monitoring_display in title
-                    and settings.TARGET_MAP_DISPLAY in title
-                ):
-                    logger.debug(f'Matched view {title}')
-                    if settings.TARGET_STATUS in row.text.upper():
-                        # Target monitoring id found and quality level achievied
-                        logger.debug(f'{settings.TARGET_STATUS} found!')
-                        vectors_url = extract_artifact_url('vectors', row)
-                        pdf_url = extract_artifact_url('200dpi-pdf', row)
-                        return vectors_url, pdf_url
+        if settings.TARGET_MAP_DISPLAY in row.text:
+            title = row.find(class_='views-field-title').span.a.text
+            if s := re.search(rf'{settings.TARGET_MONITORING_ID_DISPLAY} *(\d)+', title):
+                monitoring_id = int(s.groups()[0])
+                yield row, monitoring_id
+
+
+def get_links(product: PageElement):
+    vectors_url = _extract_artifact_url('vectors', product)
+    pdf_url = _extract_artifact_url('200dpi-pdf', product)
+    return vectors_url, pdf_url
 
 
 def init_webdriver():
@@ -78,14 +74,14 @@ def download_vectors(vectors_url: str, target_monitoring_id: int):
     label = form.find_element_by_tag_name('label')
     label.click()
 
-    logger.debug('Downloading vectors...')
+    logger.debug('Clicking submit button...')
     submit = form.find_element_by_id('edit-submit')
     submit.click()
 
     driver.quit()
 
     output_filename = f'{settings.COPERNICUS_COMPONENT_ID}-M{target_monitoring_id}.zip'
-    logger.info(f'Renaming downloaded vectors file to {output_filename} ...')
+    logger.debug(f'Renaming downloaded vectors file to {output_filename} ...')
     output_file = settings.DOWNLOADS_DIR / output_filename
     return services.rename_newest_file(output_file)
 
@@ -94,6 +90,7 @@ def download_pdf(pdf_url: str, target_monitoring_id: int):
     logger.info(f'Downloading {pdf_url} ...')
     response = requests.get(pdf_url, allow_redirects=True)
     output_filename = f'{settings.COPERNICUS_COMPONENT_ID}-M{target_monitoring_id}.pdf'
+    logger.debug(f'Renaming downloaded pdf file to {output_filename} ...')
     output_file = settings.DOWNLOADS_DIR / output_filename
     output_file.parent.mkdir(parents=True, exist_ok=True)
     output_file.write_bytes(response.content)
