@@ -27,8 +27,18 @@ def run(
     notify: bool = typer.Option(
         False, '--notify', '-n', show_default=False, help='Notify vectors package via email'
     ),
+    reset_checked_monitoring_ids: bool = typer.Option(
+        False,
+        '--reset-monit-ids',
+        '-r',
+        show_default=False,
+        help='Reset checked monitoring ids',
+    ),
 ):
     logger.setLevel(logzero.DEBUG if verbose else logzero.INFO)
+
+    if reset_checked_monitoring_ids:
+        storage.set_value(settings.CHECKED_MONITORING_IDS_KEY, json.dumps([]))
 
     checked_monitoring_ids = storage.get_value(
         settings.CHECKED_MONITORING_IDS_KEY, default=[], cast=json.loads
