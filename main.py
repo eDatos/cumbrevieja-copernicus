@@ -15,7 +15,7 @@ logger = utils.init_logger()
 @app.command()
 def run(
     verbose: bool = typer.Option(
-        False, '--verbose', '-vv', show_default=False, help='Loglevel increased to debug'
+        False, '--verbose', '-v', show_default=False, help='Loglevel increased to debug'
     ),
     clean: bool = typer.Option(
         False,
@@ -26,6 +26,12 @@ def run(
     ),
     notify: bool = typer.Option(
         False, '--notify', '-n', show_default=False, help='Notify vectors package via email'
+    ),
+    target_monitoring_id: int = typer.Option(
+        -1,
+        '--target-monit-id',
+        '-m',
+        help='Target monitoring id. If -1, all products will be checked',
     ),
     reset_checked_monitoring_ids: bool = typer.Option(
         False,
@@ -46,9 +52,14 @@ def run(
     logger.debug(f'Checked monitoring ids: {checked_monitoring_ids}')
 
     for product, monitoring_id in sorted(scrap.get_products(), key=itemgetter(1)):
+        if target_monitoring_id != -1 and monitoring_id != target_monitoring_id:
+            continue
         logger.info(f'Processing Monitoring {monitoring_id}...')
         if settings.TARGET_STATUS in product.text:
-            if monitoring_id not in checked_monitoring_ids:
+            if (
+                monitoring_id not in checked_monitoring_ids
+                or monitoring_id == target_monitoring_id
+            ):
                 vectors_url, pdf_url = scrap.get_links(product)
                 if vectors_url:
                     vectors_file = scrap.download_vectors(vectors_url, monitoring_id)
@@ -78,7 +89,7 @@ def run(
         shutil.rmtree(settings.DOWNLOADS_DIR, ignore_errors=True)
 
     storage.set_value(
-        settings.CHECKED_MONITORING_IDS_KEY, json.dumps(checked_monitoring_ids)
+        settings.CHECKED_MONITORING_IDS_KEY, json.dumps(list(set(checked_monitoring_ids)))
     )
 
 

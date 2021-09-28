@@ -4,6 +4,7 @@ import re
 from pathlib import Path
 
 import PyPDF2
+import settings
 
 
 def rename_newest_file(new_file: Path) -> Path:
@@ -20,5 +21,5 @@ def extract_map_timestamp(pdf_file: Path) -> str:
     pdf_reader = PyPDF2.PdfFileReader(str(pdf_file))
     page = pdf_reader.getPage(0)
     text = page.extractText()
-    if s := re.search(r'on *(\d{2}/\d{2}/\d{4} \d{2}:\d{2} UTC)', text):
-        return s.groups()[0]
+    if s := re.search(r'(\d{2}/\d{2}/\d{4} \d{2}:\d{2})ActivationMap', text):
+        return f'{s.groups()[0]} {settings.MAP_TIMESTAMP_TZ}'
