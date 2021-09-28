@@ -32,7 +32,7 @@ Fill out, at least, the following settings in a `.env` :
 
 ## Usage
 
-Following command will download the corresponding package vector and pdf file for the given copernicus component id and target monitoring id:
+Following command will scrap copernicus website looking for products with `TARGET_MAP_ID` and `TARGET_STATUS` and will download the corresponding package vectors and pdf files for the given copernicus component id:
 
 ```console
 $ python main.py
@@ -41,15 +41,14 @@ $ python main.py
 ### Options
 
 ```console
-$ python main.py --help
-
 Usage: main.py [OPTIONS]
 
 Options:
-  -m, --monitoring-id INTEGER  Target monitoring id. If 0, a key-value online
-                               storage is used instead!  [default: 0]
-  -vv, --verbose               Loglevel increased to debug
-  -x, --clean                  Remove download folder after execution
-  -n, --notify                 Notify vectors package via email
-  --help                       Show this message and exit.
+  -v, --verbose                  Loglevel increased to debug
+  -x, --clean                    Remove download folder after execution
+  -n, --notify                   Notify vectors package via email
+  -m, --target-monit-id INTEGER  Target monitoring id. If -1, all products
+                                 will be checked  [default: -1]
+  -r, --reset-monit-ids          Reset checked monitoring ids
+  --help                         Show this message and exit.
 ```
