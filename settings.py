@@ -42,3 +42,5 @@ LOGFILE_SIZE = config('LOGFILE_SIZE', cast=float, default=1e6)
 LOGFILE_BACKUP_COUNT = config('LOGFILE_BACKUP_COUNT', cast=int, default=3)
 
 MAP_TIMESTAMP_TZ = config('MAP_TIMESTAMP_TZ', default='UTC')
+
+CUSTOM_KEYVALUE_API_URL = config('CUSTOM_KEYVALUE_API_URL')

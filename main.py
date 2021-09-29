@@ -6,7 +6,7 @@ import logzero
 import typer
 
 import settings
-from copernicus import notification, scrap, services, storage, utils
+from copernicus import cstorage, notification, scrap, services, utils
 
 app = typer.Typer(add_completion=False)
 logger = utils.init_logger()
@@ -44,9 +44,9 @@ def run(
     logger.setLevel(logzero.DEBUG if verbose else logzero.INFO)
 
     if reset_checked_monitoring_ids:
-        storage.set_value(settings.CHECKED_MONITORING_IDS_KEY, json.dumps([]))
+        cstorage.set_value(settings.CHECKED_MONITORING_IDS_KEY, json.dumps([]))
 
-    checked_monitoring_ids = storage.get_value(
+    checked_monitoring_ids = cstorage.get_value(
         settings.CHECKED_MONITORING_IDS_KEY, default=[], cast=json.loads
     )
     logger.debug(f'Checked monitoring ids: {checked_monitoring_ids}')
@@ -88,7 +88,7 @@ def run(
         logger.debug('Cleaning downloads directory...')
         shutil.rmtree(settings.DOWNLOADS_DIR, ignore_errors=True)
 
-    storage.set_value(
+    cstorage.set_value(
         settings.CHECKED_MONITORING_IDS_KEY, json.dumps(list(set(checked_monitoring_ids)))
     )
 

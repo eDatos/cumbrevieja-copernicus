@@ -1,8 +1,8 @@
-from copernicus import storage
+from copernicus import cstorage
 
 
 def test_operations():
-    status = storage.set_value('test', 1, namespace='test-copernicus-cumprevieja')
-    assert status is True
-    value = storage.get_value('test', namespace='test-copernicus-cumprevieja', cast=int)
+    value = cstorage.set_value('test-copernicus', 1)
+    assert value == '1'
+    value = cstorage.get_value('test-copernicus', cast=int)
     assert value == 1
