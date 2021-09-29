@@ -27,3 +27,4 @@ jobs:
           SMTP_USERNAME: ${{ secrets.SMTP_USERNAME }}
           SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
           KEYVALUE_API_TOKEN: ${{ secrets.KEYVALUE_API_TOKEN }}
+          CUSTOM_KEYVALUE_API_URL: ${{ secrets.CUSTOM_KEYVALUE_API_URL }}
