@@ -1,5 +1,6 @@
 import os
 import re
+from datetime import datetime
 from urllib.parse import urljoin
 
 import requests
@@ -60,7 +61,7 @@ def init_webdriver():
     )
 
 
-def download_vectors(vectors_url: str, target_monitoring_id: int):
+def download_vectors(vectors_url: str, target_monitoring_id: int, map_timestamp: datetime):
     logger.debug('Initializing webdriver with Selenium...')
     driver = init_webdriver()
 
@@ -80,7 +81,7 @@ def download_vectors(vectors_url: str, target_monitoring_id: int):
 
     driver.quit()
 
-    output_filename = f'{settings.COPERNICUS_COMPONENT_ID}-M{target_monitoring_id}.zip'
+    output_filename = services.build_vectors_filename(target_monitoring_id, map_timestamp)
     logger.debug(f'Renaming downloaded vectors file to {output_filename} ...')
     output_file = settings.DOWNLOADS_DIR / output_filename
     return services.rename_newest_file(output_file)

@@ -1,4 +1,5 @@
 import smtplib
+from datetime import datetime
 from email import encoders
 from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
@@ -9,7 +10,7 @@ import settings
 from logzero import logger
 
 
-def notify(monitoring_id: int, map_timestamp: str, vectors_file: Path):
+def notify(monitoring_id: int, map_timestamp: datetime, vectors_file: Path):
     logger.info('Initializing notification handler...')
     send_from = settings.NOTIFICATION_FROM_ADDR
     send_to = settings.NOTIFICATION_TO_ADDRS
@@ -20,19 +21,21 @@ def notify(monitoring_id: int, map_timestamp: str, vectors_file: Path):
     msg['Subject'] = f'Actualización Copernicus - Cumbre Vieja [Monitoring {monitoring_id}]'
 
     buf = []
-    buf.append(map_timestamp or 'La marca temporal no está disponible en la web')
+    if map_timestamp is None:
+        buf.append('La marca temporal no está disponible en la web')
+    else:
+        buf.append(map_timestamp.strftime('%d/%m/%Y %H%M %Z'))
     if vectors_file is None:
         buf.append('El paquete de vectores no está disponible en la web')
-    content = '<br>'.join(buf)
-    msg.attach(MIMEText(content, 'html'))
-
-    logger.debug('Adding attachments...')
-    if vectors_file is not None:
+    else:
+        logger.debug('Adding attachment...')
         part = MIMEBase('application', 'octet-stream')
         part.set_payload(vectors_file.read_bytes())
         encoders.encode_base64(part)
         part.add_header('Content-Disposition', f'attachment; filename={vectors_file.name}')
         msg.attach(part)
+    content = '<br>'.join(buf)
+    msg.attach(MIMEText(content, 'html'))
 
     logger.info('Sending message with attached files...')
     s = smtplib.SMTP(settings.SMTP_SERVER, port=settings.SMTP_PORT)
