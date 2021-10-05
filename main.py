@@ -61,15 +61,17 @@ def run(
                 or monitoring_id == target_monitoring_id
             ):
                 vectors_url, pdf_url = scrap.get_links(product)
-                if vectors_url:
-                    vectors_file = scrap.download_vectors(vectors_url, monitoring_id)
-                else:
-                    vectors_file = None
                 if pdf_url:
                     pdf_file = scrap.download_pdf(pdf_url, monitoring_id)
                     map_timestamp = services.extract_map_timestamp(pdf_file)
                 else:
                     map_timestamp = None
+                if vectors_url:
+                    vectors_file = scrap.download_vectors(
+                        vectors_url, monitoring_id, map_timestamp
+                    )
+                else:
+                    vectors_file = None
                 if notify:
                     notification.notify(monitoring_id, map_timestamp, vectors_file)
 
