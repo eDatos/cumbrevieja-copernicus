@@ -5,3 +5,4 @@ prettyconf
 pypdf2
 logzero
 typer
+pytz
