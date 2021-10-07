@@ -5,7 +5,3 @@ services:
     image: copernicus-core
     volumes:
       - ./:/copernicus
-      - vscode-extensions:/root/.vscode-server/extensions
-
-volumes:
-  vscode-extensions:

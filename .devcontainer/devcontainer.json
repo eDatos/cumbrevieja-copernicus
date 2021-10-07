@@ -1,0 +1,34 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the README at:
+// https://github.com/microsoft/vscode-dev-containers/tree/v0.194.3/containers/docker-existing-docker-compose
+// If you want to run as a non-root user in the container, see .devcontainer/docker-compose.yml.
+{
+  "name": "Copernicus - Cumbre Vieja",
+  "dockerComposeFile": ["../docker-compose.yml", "docker-compose.yml"],
+  "service": "core",
+  "workspaceFolder": "/copernicus",
+  "settings": {
+    "editor.formatOnSave": true,
+    // Python
+    "[python]": {
+      "editor.codeActionsOnSave": {
+        "source.organizeImports": true
+      },
+      "editor.rulers": [92]
+    },
+    // Flake8
+    "python.linting.enabled": true,
+    "python.linting.pylintEnabled": false,
+    "python.linting.pylintUseMinimalCheckers": true,
+    "python.linting.flake8Enabled": true,
+    "python.linting.flake8Args": ["--max-line-length=92"],
+    // Black
+    "python.formatting.provider": "black",
+    "python.formatting.blackArgs": [
+      "--line-length",
+      "92",
+      "--skip-string-normalization"
+    ]
+  },
+  // Extensions will be added manually and persist via volumes
+  "extensions": []
+}
