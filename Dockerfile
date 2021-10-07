@@ -9,11 +9,12 @@ ENV GECKODRIVER_VERSION=0.30.0
 ENV PROJECT_DIR=/copernicus-cumbrevieja
 WORKDIR $PROJECT_DIR
 
-RUN apt-get update \
-    && apt-get install --no-install-recommends -y \
+RUN apt-get update && \
+    apt-get install --no-install-recommends -y \
         wget \
         firefox-esr \
         git \
+        openssh-client \
     && rm -rf /var/lib/apt/lists/*
 
 RUN wget https://github.com/mozilla/geckodriver/releases/download/v0.30.0/geckodriver-v$GECKODRIVER_VERSION-linux64.tar.gz && \
