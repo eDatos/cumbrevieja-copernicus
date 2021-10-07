@@ -1,0 +1,11 @@
+version: "3.9"
+services:
+  core:
+    build: .
+    image: copernicus-core
+    volumes:
+      - ./:/copernicus
+      - vscode-extensions:/root/.vscode-server/extensions
+
+volumes:
+  vscode-extensions:
