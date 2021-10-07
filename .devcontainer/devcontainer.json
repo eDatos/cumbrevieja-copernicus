@@ -5,7 +5,7 @@
   "name": "Copernicus - Cumbre Vieja",
   "dockerComposeFile": ["../docker-compose.yml", "docker-compose.yml"],
   "service": "core",
-  "workspaceFolder": "/copernicus",
+  "workspaceFolder": "/copernicus-cumbrevieja",
   "settings": {
     "editor.formatOnSave": true,
     // Python
