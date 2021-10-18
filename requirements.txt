@@ -1,6 +1,6 @@
+selenium==3.14.1
 requests
 beautifulsoup4
-selenium
 prettyconf
 pypdf2
 logzero
