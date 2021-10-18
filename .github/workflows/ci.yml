@@ -20,6 +20,7 @@ jobs:
         env:
           COPERNICUS_COMPONENT_ID: ${{ secrets.COPERNICUS_COMPONENT_ID }}
           TARGET_MAP_ID: ${{ secrets.TARGET_MAP_ID }}
+          TARGET_STATUS: ${{ secrets.TARGET_STATUS }}
           NOTIFICATION_FROM_ADDR: ${{ secrets.NOTIFICATION_FROM_ADDR }}
           NOTIFICATION_TO_ADDRS: ${{ secrets.NOTIFICATION_TO_ADDRS }}
           SMTP_SERVER: ${{ secrets.SMTP_SERVER }}
