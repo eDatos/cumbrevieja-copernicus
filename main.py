@@ -60,18 +60,17 @@ def run(
                 monitoring_id not in checked_monitoring_ids
                 or monitoring_id == target_monitoring_id
             ):
-                vectors_url, pdf_url = scrap.get_links(product)
-                if pdf_url:
-                    pdf_file = scrap.download_pdf(pdf_url, monitoring_id)
-                    map_timestamp = services.extract_map_timestamp(pdf_file)
-                else:
-                    map_timestamp = None
-                if vectors_url:
-                    vectors_file = scrap.download_vectors(
-                        vectors_url, monitoring_id, map_timestamp
+                if (links := scrap.get_links(product)).count(None) >= 1:
+                    logger.warning(
+                        f'Monitoring {monitoring_id} has missing links. Discarding...'
                     )
-                else:
-                    vectors_file = None
+                    continue
+                vectors_url, pdf_url = links
+                pdf_file = scrap.download_pdf(pdf_url, monitoring_id)
+                map_timestamp = services.extract_map_timestamp(pdf_file)
+                vectors_file = scrap.download_vectors(
+                    vectors_url, monitoring_id, map_timestamp
+                )
                 if notify:
                     notification.notify(monitoring_id, map_timestamp, vectors_file)
 

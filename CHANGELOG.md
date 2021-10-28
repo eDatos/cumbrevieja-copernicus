@@ -8,6 +8,7 @@ Released XXXX-XX-XX
 
 - Fix settings for data reference on production.
 - Enable manual launching of CI GitHub action.
+- Fix scraping when pdf or vectors link are not present.
 
 ## Version 0.1.0
 
