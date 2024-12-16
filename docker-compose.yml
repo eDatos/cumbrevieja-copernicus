@@ -1,0 +1,7 @@
+version: "3.9"
+services:
+  core:
+    build: .
+    image: copernicus-cumbrevieja-core
+    volumes:
+      - ./:/copernicus-cumbrevieja
